@@ -7,6 +7,11 @@ const handleYesClick = () => {
   question.innerHTML = "Yeieee! Friday ta laag";
   gif.src = "https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3emNna3kxYTAzZnRtaGllaTVxcjZzcmlyenRqNGd1aXRxcmNxNmp6MCZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/KDJyeD3ek5biJLIEpB/giphy.gif";
 
+  const yesSound = new Audio("assets/yehey-kids.mp3");
+  yesSound.volume = 1.0;
+  yesSound.play().catch(() => {});
+  createConfetti();
+
   // Remove the 'mouseover' event listener from noBtn
   noBtn.removeEventListener("mouseover", handleNoMouseOver);
 
@@ -198,6 +203,44 @@ const handleNoMouseOver = () => {
   noBtn.style.left = `${Math.floor(Math.random() * maxX)}px`;
   noBtn.style.top = `${Math.floor(Math.random() * maxY)}px`;
 };
+
+function createConfetti(duration = 4000) {
+  const overlay = document.createElement("div");
+  overlay.style.position = "fixed";
+  overlay.style.top = "0";
+  overlay.style.left = "0";
+  overlay.style.width = "100%";
+  overlay.style.height = "100%";
+  overlay.style.display = "flex";
+  overlay.style.justifyContent = "center";
+  overlay.style.alignItems = "center";
+  overlay.style.pointerEvents = "none";
+  overlay.style.background = "rgba(0,0,0,0.0)";
+  overlay.style.zIndex = "1";
+  overlay.style.opacity = "0";
+  overlay.style.transition = "opacity 0.3s ease-in";
+
+  const confettiGif = document.createElement("img");
+  confettiGif.src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExamI0NDhicWRobW91emthYXZyanN6cG43ZXR4NDg0amJnbzRycXdtOSZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/NuAJRTBFchvwdhPtTR/giphy.gif";
+  confettiGif.alt = "celebration";
+  confettiGif.style.maxWidth = "190vw";
+  confettiGif.style.maxHeight = "180vh";
+  confettiGif.style.display = "block";
+
+  overlay.appendChild(confettiGif);
+  document.body.appendChild(overlay);
+
+  requestAnimationFrame(() => {
+    overlay.style.opacity = "1";
+  });
+
+  setTimeout(() => {
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      overlay.remove();
+    }, 300);
+  }, duration);
+}
 
 yesBtn.addEventListener("click", handleYesClick);
 noBtn.addEventListener("mouseover", handleNoMouseOver);
