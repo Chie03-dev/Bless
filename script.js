@@ -252,14 +252,13 @@ const rainCount = isMobile ? 10 : 36;
 const sizeScale = isMobile ? 1 : 3;
 createRain(rainCount, sizeScale);
 
-// Background music: attempt muted autoplay, then offer an unmute button if needed
+// Background music: try to play unmuted at load, fallback to muted autoplay if needed
 (function setupBackgroundMusic() {
   const audio = new Audio("assets/music.mp3");
   audio.loop = true;
   audio.preload = "auto";
   audio.volume = 0.8;
   audio.muted = true;
-  audio.autoplay = true;
   audio.playsInline = true;
 
   function showButton(buttonText, onClick) {
@@ -286,13 +285,6 @@ createRain(rainCount, sizeScale);
     document.body.appendChild(btn);
   }
 
-  function showUnmuteButton() {
-    showButton("Unmute Music", (btn) => {
-      audio.muted = false;
-      btn.remove();
-    });
-  }
-
   function showPlayButton() {
     showButton("Play Music", (btn) => {
       audio.muted = false;
@@ -303,12 +295,19 @@ createRain(rainCount, sizeScale);
   function tryPlay() {
     audio.play()
       .then(() => {
-        if (audio.muted) {
-          showUnmuteButton();
-        }
+        audio.muted = false;
       })
       .catch(() => {
-        showPlayButton();
+        audio.muted = true;
+        audio.play()
+          .then(() => {
+            setTimeout(() => {
+              audio.muted = false;
+            }, 50);
+          })
+          .catch(() => {
+            showPlayButton();
+          });
       });
   }
 
