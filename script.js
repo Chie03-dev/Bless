@@ -252,18 +252,21 @@ const rainCount = isMobile ? 10 : 36;
 const sizeScale = isMobile ? 1 : 3;
 createRain(rainCount, sizeScale);
 
-// Background music: attempt autoplay, fall back to a play button if blocked
+// Background music: attempt muted autoplay, then offer an unmute button if needed
 (function setupBackgroundMusic() {
   const audio = new Audio("assets/music.mp3");
   audio.loop = true;
   audio.preload = "auto";
   audio.volume = 0.8;
+  audio.muted = true;
+  audio.autoplay = true;
+  audio.playsInline = true;
 
-  function showPlayButton() {
+  function showButton(buttonText, onClick) {
     if (document.getElementById("play-music-btn")) return;
     const btn = document.createElement("button");
     btn.id = "play-music-btn";
-    btn.textContent = "Play Music";
+    btn.textContent = buttonText;
     btn.className = "play-music-btn";
     Object.assign(btn.style, {
       position: "fixed",
@@ -278,15 +281,35 @@ createRain(rainCount, sizeScale);
       cursor: "pointer",
     });
     btn.addEventListener("click", () => {
-      audio.play().then(() => btn.remove()).catch(() => {});
+      onClick(btn);
     });
     document.body.appendChild(btn);
   }
 
-  function tryPlay() {
-    audio.play().catch(() => {
-      showPlayButton();
+  function showUnmuteButton() {
+    showButton("Unmute Music", (btn) => {
+      audio.muted = false;
+      btn.remove();
     });
+  }
+
+  function showPlayButton() {
+    showButton("Play Music", (btn) => {
+      audio.muted = false;
+      audio.play().then(() => btn.remove()).catch(() => {});
+    });
+  }
+
+  function tryPlay() {
+    audio.play()
+      .then(() => {
+        if (audio.muted) {
+          showUnmuteButton();
+        }
+      })
+      .catch(() => {
+        showPlayButton();
+      });
   }
 
   if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -295,7 +318,6 @@ createRain(rainCount, sizeScale);
     window.addEventListener("DOMContentLoaded", tryPlay);
   }
 
-  // If user interacts with the page, try again (some browsers require interaction)
   document.addEventListener(
     "click",
     () => {
